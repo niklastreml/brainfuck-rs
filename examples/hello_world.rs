@@ -1,4 +1,3 @@
-extern crate brainfuck;
 use brainfuck::brainfuck;
 
 fn main() {

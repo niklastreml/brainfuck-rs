@@ -36,7 +36,7 @@ pub fn brainfuck(item: TokenStream) -> TokenStream {
                 }
                 '>' => output.push_str("ptr += 1;\n"),
                 '<' => output.push_str("ptr -= 1;\n"),
-                '.' => output.push_str("print!(\"{}\", tape[ptr] as u8 as char);\n"),
+                '.' => output.push_str("print!(\"{}\", tape[ptr] as char);\n"),
                 ',' => output.push_str("unimplemented!();\n"),
                 '[' => output.push_str("while tape[ptr] != 0 {\n"),
                 ']' => output.push_str("}\n"),
@@ -53,6 +53,7 @@ let mut tape: Vec<u8> = vec![0;{}];
         output.as_str()
     )
     .to_string();
+    println!("{}", output);
 
     output.parse().unwrap()
 }
