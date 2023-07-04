@@ -12,9 +12,14 @@ pub fn brainfuck(item: TokenStream) -> TokenStream {
         s.next();
         s.next_back();
         let s = s.as_str();
+
         buffer_size = s.matches(">").count();
         if buffer_size == 0 {
             buffer_size += 1;
+        }
+
+        if s.matches(",").count() > 0 {
+            output.push_str("use std::io::Read;\n");
         }
 
         let mut chars_iter = s.chars().peekable();
@@ -37,7 +42,9 @@ pub fn brainfuck(item: TokenStream) -> TokenStream {
                 '>' => output.push_str("ptr += 1;\n"),
                 '<' => output.push_str("ptr -= 1;\n"),
                 '.' => output.push_str("print!(\"{}\", tape[ptr] as char);\n"),
-                ',' => output.push_str("unimplemented!();\n"),
+                ',' => output.push_str(
+                    "tape[ptr] = std::io::stdin().bytes().next().and_then(|result| result.ok()).expect(\"Expected value\");\n",
+                ),
                 '[' => output.push_str("while tape[ptr] != 0 {\n"),
                 ']' => output.push_str("}\n"),
                 _ => (),
@@ -45,15 +52,16 @@ pub fn brainfuck(item: TokenStream) -> TokenStream {
         }
     }
 
-    let output = format!(
-        "let mut ptr: usize= 0;
+    let mut output = format!(
+        "{{
+let mut ptr: usize= 0;
 let mut tape: Vec<u8> = vec![0;{}];
 {}",
         buffer_size,
         output.as_str()
     )
     .to_string();
-    println!("{}", output);
+    output.push_str("}");
 
     output.parse().unwrap()
 }
