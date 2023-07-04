@@ -13,11 +13,27 @@ pub fn brainfuck(item: TokenStream) -> TokenStream {
         s.next_back();
         let s = s.as_str();
         buffer_size = s.matches(">").count();
+        if buffer_size == 0 {
+            buffer_size += 1;
+        }
 
-        for char in s.chars() {
-            match format!("{}", char).chars().nth(0).unwrap() {
-                '+' => output.push_str("tape[ptr] += 1;\n"),
-                '-' => output.push_str("tape[ptr] -= 1;\n"),
+        let mut chars_iter = s.chars().peekable();
+        while let Some(char) = chars_iter.next() {
+            match char {
+                '+' => {
+                    let mut amount = 1;
+                    while chars_iter.next_if_eq(&'+').is_some() {
+                        amount += 1;
+                    }
+                    output.push_str(format!("tape[ptr] += {};\n", amount).as_str());
+                }
+                '-' => {
+                    let mut amount = 1;
+                    while chars_iter.next_if_eq(&'-').is_some() {
+                        amount += 1;
+                    }
+                    output.push_str(format!("tape[ptr] -= {};\n", amount).as_str());
+                }
                 '>' => output.push_str("ptr += 1;\n"),
                 '<' => output.push_str("ptr -= 1;\n"),
                 '.' => output.push_str("print!(\"{}\", tape[ptr] as u8 as char);\n"),
